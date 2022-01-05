@@ -127,8 +127,8 @@ class APIConnectionTest(TestCase):
 
         # Delete the contact from the administration
         delete_result = self.api.delete('contacts/%s' % contact_id, administration_id=adm_id)
-     
-        self.assertEqual(delete_result, None, "The contact has not been deleted properly.")
+
+        self.assertEqual(delete_result['id'], contact_id, "The contact has not been deleted properly.")
 
         # Check deletion
         try:

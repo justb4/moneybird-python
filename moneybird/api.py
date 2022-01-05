@@ -1,5 +1,5 @@
 import logging
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 import requests
 
@@ -45,7 +45,7 @@ class MoneyBird(object):
         )
         return self._process_response(response)
 
-    def post(self, resource_path: str, data: dict, administration_id: int = None):
+    def post(self, resource_path: str, data: dict = None, files: dict = None, administration_id: int = None):
         """
         Performs a POST request to the endpoint identified by the resource path. POST requests are usually used to add
         new data.
@@ -59,13 +59,20 @@ class MoneyBird(object):
 
         :param resource_path: The resource path.
         :param data: The data to send to the server.
+        :param files: In case of file attachments, a dict with a bytes-like object, e.g. {'file': <bytes>}
         :param administration_id: The administration id (optional, depending on the resource path).
         :return: The decoded JSON response for the request.
         """
-        response = self.session.post(
-            url=self._get_url(administration_id, resource_path),
-            json=data,
-        )
+        if files is not None:
+            response = self.session.post(
+                url=self._get_url(administration_id, resource_path),
+                files=files,
+            )
+        else:
+            response = self.session.post(
+                url=self._get_url(administration_id, resource_path),
+                json=data,
+            )
         return self._process_response(response)
 
     def patch(self, resource_path: str, data: dict, administration_id: int = None):
@@ -130,7 +137,14 @@ class MoneyBird(object):
         if administration_id is not None:
             url = urljoin(url, '%s/' % administration_id)
 
+        resource_path_parsed = urlparse(resource_path)
+        resource_path = resource_path_parsed.path
+
         url = urljoin(url, '%s.json' % resource_path)
+
+        query = resource_path_parsed.query
+        if query:
+            url = urljoin(url, "?%s" % query)
 
         return url
 
