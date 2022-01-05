@@ -2,7 +2,8 @@ import os
 from unittest import TestCase
 from urllib.parse import unquote
 
-from moneybird import TokenAuthentication, OAuthAuthentication, MoneyBird
+from moneybird import TokenAuthentication, OAuthAuthentication
+from api import MoneyBird
 
 TEST_TOKEN = os.getenv('MONEYBIRD_TEST_TOKEN')
 
@@ -106,8 +107,8 @@ class APIConnectionTest(TestCase):
         post_result = self.api.post('contacts', {'contact': contact}, administration_id=adm_id)
 
         self.assertEqual(post_result['company_name'], 'MoneyBird API', "The contact has not been created properly.")
-        self.assertEqual(post_result['firstname'], 'John', "The contact has not been created properly.")
-        self.assertEqual(post_result['lastname'], 'Doe', "The contact has not been created properly.")
+        self.assertEqual(post_result['contact_people'][0]['firstname'], 'John', "The contact has not been created properly.")
+        self.assertEqual(post_result['contact_people'][0]['lastname'], 'Doe', "The contact has not been created properly.")
         self.assertIsNotNone(post_result['id'], "The contact has not been created properly.")
 
         # Set the id of the contact for further use.
@@ -128,7 +129,7 @@ class APIConnectionTest(TestCase):
         # Delete the contact from the administration
         delete_result = self.api.delete('contacts/%s' % contact_id, administration_id=adm_id)
 
-        self.assertEqual(delete_result['id'], contact_id, "The contact has not been deleted properly.")
+        self.assertEqual(delete_result, None, "The contact has not been deleted properly.")
 
         # Check deletion
         try:
